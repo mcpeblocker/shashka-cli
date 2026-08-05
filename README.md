@@ -4,12 +4,12 @@
 [![license](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![node](https://img.shields.io/node/v/@shashka/cli?label=node)](https://www.npmjs.com/package/@shashka/cli)
 
-Terminal shashka — checkers / draughts — played right inside your shell, with an optional live connection to [shashka.mcpeblocker.uz](https://shashka.mcpeblocker.uz) for online play against real opponents.
+Terminal shashka — checkers / draughts — played right inside your shell, with an optional live connection to [shashka.uz](https://shashka.uz) for online play against real opponents.
 
 ## Features
 
 - Play shashka offline against a built-in minimax AI.
-- **Play online** against real opponents via [shashka.mcpeblocker.uz](https://shashka.mcpeblocker.uz).
+- **Play online** against real opponents via [shashka.uz](https://shashka.uz).
 - **Browser login** — authenticate with your display name in the browser; the terminal picks it up automatically.
 - **Create or join** a game with a short code or URL.
 - Last-move highlighting — the board marks where the opponent's piece came from (`-x-`) and where it landed (`>x<`).
@@ -48,7 +48,7 @@ A menu appears:
   [4]  Join online game    (login required)
   [5]  Settings
 
-  Server: https://shashka.mcpeblocker.uz
+  Server: https://shashka.uz
   Ctrl+C to exit
 ```
 
@@ -65,12 +65,12 @@ Pick **[2] Create online game**. The terminal prints a short code and a URL:
 ```
 Game created!
   Code: a1b2c3d4
-  URL:  https://shashka.mcpeblocker.uz/?room=a1b2c3d4
+  URL:  https://shashka.uz/?room=a1b2c3d4
 
 Waiting for opponent to join...
 ```
 
-Share the code or URL with your opponent. They can join from a browser at shashka.mcpeblocker.uz or from another `shashka` terminal session.
+Share the code or URL with your opponent. They can join from a browser at shashka.uz or from another `shashka` terminal session.
 
 ### 3. Join a game
 

@@ -11,7 +11,7 @@ export interface ShashkaConfig {
 const CONFIG_DIR = join(homedir(), '.shashka');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
 
-const DEFAULT_URL = process.env['SHASHKA_SERVER_URL'] ?? 'https://shashka.mcpeblocker.uz';
+const DEFAULT_URL = process.env['SHASHKA_SERVER_URL'] ?? 'https://shashka.uz';
 
 export function loadConfig(): ShashkaConfig {
   try {
