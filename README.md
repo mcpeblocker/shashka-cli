@@ -97,11 +97,22 @@ The opponent's last move is shown in the header and highlighted on the board (`-
 
 ### Arrow-key mode (default)
 
+**Picking a piece to move:**
+
 | Key | Action |
 |---|---|
-| Arrow keys | Move cursor between pieces / destinations |
-| `Enter` | Select piece / confirm move |
-| `Esc` | Cancel selection |
+| `↑` / `↓` | Move cursor between rows |
+| `←` / `→` | Move cursor between squares within the same row |
+| `Enter` | Select the piece under the cursor (must be a movable `^x^` piece) |
+| `Ctrl+C` | Quit |
+
+**Choosing a destination (after selecting a piece):**
+
+| Key | Action |
+|---|---|
+| Arrow keys | Jump between legal destination squares |
+| `Enter` | Confirm the move |
+| `Esc` | Cancel — go back to piece selection |
 | `Ctrl+C` | Quit |
 
 ### Text mode

@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { squareToRowCol } from './board.js';
+import { squareToRowCol, rowColToSquare } from './board.js';
 import { renderBoard } from './render.js';
 import { squareToCoord } from './notation.js';
 import type { MoveResolver } from './player.js';
@@ -7,13 +7,28 @@ import type { SquareIndex } from './types.js';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
-/**
- * Closest candidate strictly in `dir` from `from`: nearest row/col line first
- * (even if the match on that line is diagonally offset), then nearest on the
- * other axis. Playable squares never share a row or column with their
- * diagonal neighbors, so a plain "move by 1" cursor would skip over them —
- * this hops straight to the next reachable square instead.
- */
+// Row/column nav: ↑/↓ change row (snap to nearest dark square in that row),
+// ←/→ move between dark squares within the same row (2 cols apart).
+function gridStep(from: SquareIndex, dir: Direction): SquareIndex | null {
+  const { row, col } = squareToRowCol(from);
+  if (dir === 'up' || dir === 'down') {
+    const newRow = dir === 'up' ? row - 1 : row + 1;
+    if (newRow < 0 || newRow > 7) return null;
+    // dark squares in newRow are the cols where (newRow+c)%2===1
+    const darkCols = [0, 1, 2, 3, 4, 5, 6, 7].filter((c) => (newRow + c) % 2 === 1);
+    const nearest = darkCols.reduce((best, c) =>
+      Math.abs(c - col) < Math.abs(best - col) ? c : best,
+    );
+    const sq = rowColToSquare(newRow, nearest);
+    return sq === -1 ? null : sq;
+  } else {
+    const newCol = dir === 'left' ? col - 2 : col + 2;
+    if (newCol < 0 || newCol > 7) return null;
+    const sq = rowColToSquare(row, newCol);
+    return sq === -1 ? null : sq;
+  }
+}
+
 function nearestInDirection(from: SquareIndex, candidates: SquareIndex[], dir: Direction): SquareIndex | null {
   const { row: fr, col: fc } = squareToRowCol(from);
   let best: SquareIndex | null = null;
@@ -103,8 +118,8 @@ export function createArrowInput(opts?: ArrowInputOpts): MoveResolver {
         console.log('[x]=cursor  (x)=selected  ^x^=movable  *=destination  >x<=last move');
         console.log(
           selectedFrom === null
-            ? `Arrows to jump between movable pieces, Enter to select. Cursor: ${squareToCoord(cursor)}`
-            : `Piece at ${squareToCoord(selectedFrom)} selected. Arrows to jump between destinations, Enter to move, Esc to cancel. Cursor: ${squareToCoord(cursor)}`,
+            ? `↑↓=row  ←→=column  Enter=select piece  |  Cursor: ${squareToCoord(cursor)}${movableSquares.includes(cursor) ? ' (movable)' : ''}`
+            : `↑↓←→=destination  Enter=move  Esc=cancel  |  Cursor: ${squareToCoord(cursor)}`,
         );
         if (message) console.log(message);
       };
@@ -125,8 +140,14 @@ export function createArrowInput(opts?: ArrowInputOpts): MoveResolver {
           key.name === 'up' || key.name === 'down' || key.name === 'left' || key.name === 'right' ? key.name : null;
 
         if (dir) {
-          const next = nearestInDirection(cursor, candidates(), dir);
-          if (next !== null) cursor = next;
+          if (selectedFrom === null) {
+            const next = gridStep(cursor, dir);
+            if (next !== null) cursor = next;
+          } else {
+            // Jump between destination candidates
+            const next = nearestInDirection(cursor, candidates(), dir);
+            if (next !== null) cursor = next;
+          }
         } else if (key.name === 'escape') {
           if (selectedFrom !== null) {
             const previous = selectedFrom;
@@ -135,6 +156,11 @@ export function createArrowInput(opts?: ArrowInputOpts): MoveResolver {
           }
         } else if (key.name === 'return') {
           if (selectedFrom === null) {
+            if (!movableSquares.includes(cursor)) {
+              message = 'No movable piece here — navigate to a ^x^ square.';
+              draw();
+              return;
+            }
             selectedFrom = cursor;
             cursor = nearestOverall(cursor, candidates());
           } else {
