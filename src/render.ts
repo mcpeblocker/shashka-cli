@@ -8,6 +8,10 @@ export interface RenderOverlay {
   movable?: SquareIndex[];
   /** Legal destination squares for the currently selected piece. */
   destinations?: SquareIndex[];
+  /** Square the last-moved piece came from (shown as -.-). */
+  lastMoveFrom?: SquareIndex;
+  /** Square the last-moved piece landed on (shown as >x<). */
+  lastMoveTo?: SquareIndex;
 }
 
 function pieceChar(board: Board, square: SquareIndex): string {
@@ -23,18 +27,22 @@ function cellStr(board: Board, square: SquareIndex, overlay: RenderOverlay): str
   const isSelected = overlay.selected === square;
   const isDest = overlay.destinations?.includes(square) ?? false;
   const isMovable = overlay.movable?.includes(square) ?? false;
+  const isLastTo = overlay.lastMoveTo === square;
+  const isLastFrom = overlay.lastMoveFrom === square;
 
   if (isCursor && isSelected) return `{${ch}}`;
   if (isCursor) return `[${ch}]`;
   if (isSelected) return `(${ch})`;
   if (isDest) return ' * ';
   if (isMovable) return `^${ch}^`;
+  if (isLastTo) return `>${ch}<`;
+  if (isLastFrom) return `-${ch}-`;
   return ` ${ch} `;
 }
 
 export function renderBoard(board: Board, overlay: RenderOverlay = {}): string {
   const lines: string[] = [];
-  lines.push('    a   b   c   d   e   f   g   h');
+  lines.push('   ' + 'abcdefgh'.split('').map((c) => ` ${c} `).join(''));
   for (let row = 0; row < 8; row++) {
     const displayRow = 8 - row;
     const cells: string[] = [];

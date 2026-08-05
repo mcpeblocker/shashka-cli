@@ -65,8 +65,15 @@ function nearestOverall(from: SquareIndex, candidates: SquareIndex[]): SquareInd
   return best;
 }
 
+export interface ArrowInputOpts {
+  /** Called each draw to get an optional header printed above the board. */
+  getHeader?: () => string;
+  /** Called each draw to get the last-move squares to highlight on the board. */
+  getLastMove?: () => { from: SquareIndex; to: SquareIndex } | null;
+}
+
 /** Cursor-based selection: hops between movable pieces, then between that piece's legal destinations. */
-export function createArrowInput(): MoveResolver {
+export function createArrowInput(opts?: ArrowInputOpts): MoveResolver {
   return (state, legal) =>
     new Promise((resolve) => {
       const movableSquares = [...new Set(legal.map((m) => m.from))];
@@ -80,15 +87,20 @@ export function createArrowInput(): MoveResolver {
 
       const draw = () => {
         console.clear();
+        const header = opts?.getHeader?.();
+        if (header) console.log(header);
+        const lastMove = opts?.getLastMove?.();
         console.log(
           renderBoard(state.board, {
             cursor,
             selected: selectedFrom ?? undefined,
             movable: selectedFrom === null ? movableSquares : undefined,
             destinations: selectedFrom === null ? [] : candidates(),
+            lastMoveFrom: lastMove?.from,
+            lastMoveTo: lastMove?.to,
           }),
         );
-        console.log('[x] = cursor   (x) = selected   ^x^ = can move   * = legal destination');
+        console.log('[x]=cursor  (x)=selected  ^x^=movable  *=destination  >x<=last move');
         console.log(
           selectedFrom === null
             ? `Arrows to jump between movable pieces, Enter to select. Cursor: ${squareToCoord(cursor)}`
